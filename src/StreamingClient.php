@@ -91,6 +91,17 @@ class StreamingClient extends EventEmitter implements Client
         } elseif (count($args) !== 1 && in_array($name, $pubsubs)) {
             $request->reject(new InvalidArgumentException('PubSub commands limited to single argument'));
         } else {
+            // for hmset working
+            if($name === 'hmset'){
+                if (count($args) === 2 && is_array($args[1])) {
+                    $flattenedKVs = array($args[0]);
+                    foreach ($args[1] as $k => $v) {
+                        $flattenedKVs[] = $k;
+                        $flattenedKVs[] = $v;
+                    }
+                    $args = $flattenedKVs;
+                }
+            }
             $this->stream->write($this->serializer->getRequestMessage($name, $args));
             $this->requests []= $request;
         }
